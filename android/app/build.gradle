@@ -99,6 +99,9 @@ dependencies {
 
   implementation "androidx.media:media:$androidx_media_version"
 
+  // Fold posture and hinge position
+  implementation "androidx.window:window:$androidxWindowVersion"
+
   // Exo Player
   if (findProject(':exoplayer-library-core') != null) {
     implementation project(':exoplayer-library-core')

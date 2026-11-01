@@ -15,21 +15,6 @@ export default {
       default: () => {}
     }
   },
-  data() {
-    return {
-      width: 0
-    }
-  },
-  watch: {
-    show(val) {
-      if (val) {
-        this.setWidth()
-        this.setListeners()
-      } else {
-        this.removeListeners()
-      }
-    }
-  },
   computed: {
     show: {
       get() {
@@ -41,28 +26,11 @@ export default {
     },
     bookCoverAspectRatio() {
       return this.$store.getters['libraries/getBookCoverAspectRatio']
+    },
+    width() {
+      const { windowWidth, windowHeight } = this.$store.state.globals
+      return Math.min(windowWidth, windowHeight / this.bookCoverAspectRatio)
     }
-  },
-  methods: {
-    screenOrientationChange() {
-      setTimeout(this.setWidth, 50)
-    },
-    setListeners() {
-      screen.orientation.addEventListener('change', this.screenOrientationChange)
-    },
-    removeListeners() {
-      screen.orientation.removeEventListener('change', this.screenOrientationChange)
-    },
-    setWidth() {
-      if (window.innerHeight > window.innerWidth) {
-        this.width = window.innerWidth
-      } else {
-        this.width = window.innerHeight / this.bookCoverAspectRatio
-      }
-    }
-  },
-  mounted() {
-    this.setWidth()
   }
 }
 </script>

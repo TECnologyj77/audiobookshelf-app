@@ -16,13 +16,17 @@ export default {
     return {
       loading: true,
       authors: [],
-      loadedLibraryId: null,
-      cardWidth: 200
+      loadedLibraryId: null
     }
   },
   computed: {
     currentLibraryId() {
       return this.$store.state.libraries.currentLibraryId
+    },
+    cardWidth() {
+      const columnsBySizeClass = { compact: 2, medium: 3, expanded: 4 }
+      const columns = columnsBySizeClass[this.$store.getters['globals/getSizeClass']]
+      return (this.$store.state.globals.windowWidth - 32 - columns * 16) / columns
     },
     cardHeight() {
       return this.cardWidth * 1.25
@@ -30,7 +34,6 @@ export default {
   },
   methods: {
     async init() {
-      this.cardWidth = (window.innerWidth - 64) / 2
       if (!this.currentLibraryId) {
         return
       }

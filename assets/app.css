@@ -24,6 +24,21 @@ textarea {
   margin-top: env(safe-area-inset-top);
 }
 
+/* Half-open device: keep dialogs on one side of the hinge */
+.posture-tabletop .modal-fold-aware {
+  padding-top: var(--fold-bottom);
+}
+.posture-tabletop .modal-fold-aware .modal-close {
+  top: calc(var(--fold-bottom) + 4px);
+}
+.posture-book .modal-fold-aware {
+  padding-left: var(--fold-right);
+}
+.posture-tabletop .modal-fold-aware > .modal-content,
+.posture-book .modal-fold-aware > .modal-content {
+  max-height: 100%;
+}
+
 #content {
   height: calc(100% - 64px);
   min-height: calc(100% - 64px);

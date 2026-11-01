@@ -186,17 +186,32 @@ export default {
       coverRgb: 'rgb(55, 56, 56)',
       coverBgIsLight: false,
       titleMarquee: null,
-      isRefreshingUI: false
+      isRefreshingUI: false,
+      autoExpandedForTabletop: false
     }
   },
   watch: {
     showFullscreen(val) {
+      if (!val) this.autoExpandedForTabletop = false
       this.updateScreenSize()
       this.$store.commit('setPlayerFullscreen', !!val)
       document.querySelector('body').style.backgroundColor = this.showFullscreen ? this.coverRgb : ''
     },
     bookCoverAspectRatio() {
       this.updateScreenSize()
+    },
+    devicePosture(posture, previousPosture) {
+      if (posture === 'tabletop') {
+        // Standing the device on its hinge is a request for the now playing view
+        const isBusy = this.$store.state.globals.isModalOpen || this.$store.state.showReader
+        if (this.playbackSession && !this.showFullscreen && !isBusy) {
+          this.expandToFullscreen()
+          this.autoExpandedForTabletop = true
+        }
+      } else if (previousPosture === 'tabletop' && this.autoExpandedForTabletop) {
+        this.collapseFullscreen()
+      }
+      this.screenOrientationChange()
     },
     title(val) {
       if (this.titleMarquee) this.titleMarquee.init(val)
@@ -264,13 +279,17 @@ export default {
     bookCoverAspectRatio() {
       return this.$store.getters['libraries/getBookCoverAspectRatio']
     },
+    devicePosture() {
+      return this.$store.state.globals.foldState.posture
+    },
     bookCoverWidth() {
       if (this.showFullscreen) return this.fullscreenBookCoverWidth
       return 46 / this.bookCoverAspectRatio
     },
     fullscreenBookCoverWidth() {
-      if (this.windowWidth < this.windowHeight) {
-        // Portrait
+      // Keep in sync with the two column media queries below
+      if (this.windowWidth < this.windowHeight && this.windowWidth < 600) {
+        // Single column
         let sideSpace = 20
         if (this.bookCoverAspectRatio === 1.6) sideSpace += (this.windowWidth - sideSpace) * 0.375
 
@@ -282,7 +301,7 @@ export default {
         }
         return width
       } else {
-        // Landscape
+        // Two columns
         const heightScale = (this.windowHeight - 200) / 651
         if (this.bookCoverAspectRatio === 1) {
           return 260 * heightScale
@@ -1049,7 +1068,7 @@ export default {
 .fullscreen .playerContainer {
   height: 200px;
 }
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .playerContainer {
     width: 50%;
     left: 50%;
@@ -1083,7 +1102,7 @@ export default {
   border-radius: 3px;
   overflow: hidden;
 }
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .cover-wrapper {
     left: 25px !important;
     top: 50px;
@@ -1109,17 +1128,19 @@ export default {
   left: 0;
   right: 0;
 }
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .total-track {
     left: 50%;
     width: 50%;
   }
 }
 
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .title-author-texts {
     left: 50% !important;
     width: 50% !important;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 .title-author-texts {
@@ -1138,7 +1159,7 @@ export default {
   font-size: 0.85rem;
   line-height: 1.5;
 }
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .title-author-texts .title-text {
     font-size: larger !important;
   }
@@ -1149,7 +1170,7 @@ export default {
   font-size: 0.75rem;
   line-height: 1.2;
 }
-@media (orientation: landscape) {
+@media (orientation: landscape), (min-width: 600px) {
   .fullscreen .title-author-texts .author-text {
     font-size: inherit !important;
   }
@@ -1235,5 +1256,58 @@ export default {
 }
 .fullscreen #playerControls .play-btn .material-symbols {
   font-size: 2.1rem;
+}
+
+/* Device held upright with the hinge running down the middle: leave a gutter for the crease */
+@media (orientation: portrait) and (min-width: 600px) {
+  .fullscreen .cover-wrapper {
+    width: calc(50% - 41px) !important;
+  }
+}
+
+/* Half open with a vertical hinge: cover on the left page, everything else on the right */
+.posture-book .fullscreen .cover-wrapper {
+  width: calc(var(--fold-left) - 41px) !important;
+}
+.posture-book .fullscreen .playerContainer,
+.posture-book .fullscreen .total-track {
+  left: var(--fold-right);
+  width: calc(100% - var(--fold-right));
+}
+.posture-book .fullscreen .title-author-texts {
+  left: var(--fold-right) !important;
+  width: calc(100% - var(--fold-right)) !important;
+}
+
+/* Half open with a horizontal hinge: cover and title stand up, controls lie flat */
+.posture-tabletop .fullscreen .cover-wrapper {
+  left: 76px !important;
+  top: 16px;
+  bottom: auto;
+  width: calc(var(--fold-top) - 32px) !important;
+  height: calc(var(--fold-top) - 32px) !important;
+}
+.posture-tabletop .fullscreen .title-author-texts {
+  left: calc(var(--fold-top) + 44px) !important;
+  width: calc(100% - var(--fold-top) - 44px) !important;
+  top: 0;
+  bottom: auto;
+  height: var(--fold-top);
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* Read from a distance when the device is standing on a table */
+.posture-tabletop .fullscreen .title-author-texts .title-text {
+  font-size: 1.6rem !important;
+}
+.posture-tabletop .fullscreen .title-author-texts .author-text {
+  font-size: 1.15rem !important;
+}
+.posture-tabletop .fullscreen .playerContainer,
+.posture-tabletop .fullscreen .total-track {
+  left: 0;
+  width: 100%;
 }
 </style>

@@ -28,6 +28,9 @@ export default {
     return {
       routeFullPath: null,
       entitiesPerShelf: 2,
+      // Width the current layout was built for. Updated once a resize settles so cards aren't resized before they are rebuilt
+      layoutWidth: window.innerWidth,
+      resizeTimeout: null,
       bookshelfHeight: 0,
       bookshelfWidth: 0,
       bookshelfMarginLeft: 0,
@@ -54,9 +57,16 @@ export default {
     },
     seriesId() {
       this.resetEntities()
+    },
+    windowWidth() {
+      clearTimeout(this.resizeTimeout)
+      this.resizeTimeout = setTimeout(this.windowWidthSettled, 150)
     }
   },
   computed: {
+    windowWidth() {
+      return this.$store.state.globals.windowWidth
+    },
     user() {
       return this.$store.state.user.user
     },
@@ -105,7 +115,7 @@ export default {
       return this.$store.getters['libraries/getBookCoverAspectRatio']
     },
     bookWidth() {
-      const availableWidth = window.innerWidth - 16
+      const availableWidth = this.layoutWidth - 16
       let coverSize = 100
 
       // Smaller screens fill width with 2 items per row
@@ -490,11 +500,25 @@ export default {
         this.libraryItemUpdated(ab)
       })
     },
-    screenOrientationChange() {
-      setTimeout(() => {
-        console.log('LazyBookshelf Screen orientation change')
-        this.resetEntities()
-      }, 50)
+    async windowWidthSettled() {
+      if (this.windowWidth === this.layoutWidth) return
+      if (this.isFetchingEntities) {
+        // Try again once the current fetch has had time to finish
+        this.resizeTimeout = setTimeout(this.windowWidthSettled, 150)
+        return
+      }
+
+      // Keep the same items in view after the columns change
+      const wrapper = document.getElementById('bookshelf-wrapper')
+      const firstVisibleEntity = wrapper ? Math.floor(wrapper.scrollTop / this.shelfHeight) * this.entitiesPerShelf : 0
+
+      this.layoutWidth = this.windowWidth
+      await this.resetEntities()
+
+      if (wrapper && firstVisibleEntity) {
+        await this.$nextTick()
+        wrapper.scrollTop = Math.floor(firstVisibleEntity / this.entitiesPerShelf) * this.shelfHeight
+      }
     },
     initListeners() {
       const bookshelf = document.getElementById('bookshelf-wrapper')
@@ -510,13 +534,6 @@ export default {
       this.$socket.$on('item_removed', this.libraryItemRemoved)
       this.$socket.$on('items_updated', this.libraryItemsUpdated)
       this.$socket.$on('items_added', this.libraryItemsAdded)
-
-      if (screen.orientation) {
-        // Not available on ios
-        screen.orientation.addEventListener('change', this.screenOrientationChange)
-      } else {
-        document.addEventListener('orientationchange', this.screenOrientationChange)
-      }
     },
     removeListeners() {
       const bookshelf = document.getElementById('bookshelf-wrapper')
@@ -532,13 +549,6 @@ export default {
       this.$socket.$off('item_removed', this.libraryItemRemoved)
       this.$socket.$off('items_updated', this.libraryItemsUpdated)
       this.$socket.$off('items_added', this.libraryItemsAdded)
-
-      if (screen.orientation) {
-        // Not available on ios
-        screen.orientation.removeEventListener('change', this.screenOrientationChange)
-      } else {
-        document.removeEventListener('orientationchange', this.screenOrientationChange)
-      }
     }
   },
   updated() {
@@ -551,6 +561,7 @@ export default {
     this.initListeners()
   },
   beforeDestroy() {
+    clearTimeout(this.resizeTimeout)
     this.removeListeners()
 
     // Set bookshelf scroll position for specific bookshelf page and query

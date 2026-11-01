@@ -5,7 +5,10 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        short: { raw: '(max-height: 500px)' }
+        short: { raw: '(max-height: 500px)' },
+        // Window size classes. Keep in sync with store/globals.js
+        medium: { raw: '(min-width: 600px)' },
+        expanded: { raw: '(min-width: 840px)' }
       },
       colors: {
         bg: 'rgb(var(--color-bg) / <alpha-value>)',

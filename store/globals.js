@@ -1,4 +1,12 @@
+// Window size classes, in CSS px. Keep in sync with the screens in tailwind.config.js
+export const MEDIUM_MIN_WIDTH = 600
+export const EXPANDED_MIN_WIDTH = 840
+
 export const state = () => ({
+  windowWidth: process.client ? window.innerWidth : 0,
+  windowHeight: process.client ? window.innerHeight : 0,
+  // posture: none | flat | tabletop | book. Hinge edges are CSS px relative to the WebView
+  foldState: { posture: 'none', hingeLeft: 0, hingeTop: 0, hingeRight: 0, hingeBottom: 0 },
   isModalOpen: false,
   itemDownloads: [],
   bookshelfListView: false,
@@ -18,6 +26,11 @@ export const state = () => ({
 })
 
 export const getters = {
+  getSizeClass: (state) => {
+    if (state.windowWidth >= EXPANDED_MIN_WIDTH) return 'expanded'
+    if (state.windowWidth >= MEDIUM_MIN_WIDTH) return 'medium'
+    return 'compact'
+  },
   getDownloadItem:
     (state) =>
     (libraryItemId, episodeId = null) => {
@@ -96,6 +109,13 @@ export const actions = {
 }
 
 export const mutations = {
+  setWindowSize(state, { width, height }) {
+    state.windowWidth = width
+    state.windowHeight = height
+  },
+  setFoldState(state, foldState) {
+    state.foldState = foldState
+  },
   setIsModalOpen(state, val) {
     state.isModalOpen = val
   },
