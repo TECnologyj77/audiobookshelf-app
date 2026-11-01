@@ -16,6 +16,7 @@ module.exports = {
         fg: 'rgb(var(--color-fg) / <alpha-value>)',
         'fg-muted': 'rgb(var(--color-fg-muted) / <alpha-value>)',
         secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
+        brass: 'rgb(var(--color-brass) / <alpha-value>)',
         primary: 'rgb(var(--color-primary) / <alpha-value>)',
         border: 'rgb(var(--color-border) / <alpha-value>)',
         'bg-toggle': 'rgb(var(--color-bg-toggle) / <alpha-value>)',
@@ -35,6 +36,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Source Sans Pro', ...defaultTheme.fontFamily.sans],
+        // Book titles and headings
+        book: ['Literata', 'Georgia', 'serif'],
         mono: ['Ubuntu Mono', ...defaultTheme.fontFamily.mono]
       },
       fontSize: {

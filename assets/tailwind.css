@@ -5,21 +5,22 @@
 @layer base {
   :root {
     color: white;
-    --color-bg: 56 56 56;
-    --color-bg-hover: 102 104 107;
-    --color-fg: 230 237 243;
-    --color-fg-muted: 142 147 153;
-    --color-primary: 35 35 35;
-    --color-secondary: 47 48 48;
-    --color-border: 75 85 89;
-    --color-bg-toggle: 56 56 56;
-    --color-bg-toggle-selected: 81 82 84;
-    --color-track-cursor: 229 231 235;
-    --color-track: 107 114 128;
-    --color-track-buffered: 75 85 99;
-    --gradient-item-page: linear-gradient(169deg, rgba(0, 0, 0, 0.4) 0%, rgba(55, 56, 56, 1) 80%);
-    --gradient-audio-player: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(38, 38, 38, 1) 80%);
-    --gradient-minimized-audio-player: linear-gradient(145deg, rgba(38, 38, 38, 0.5) 0%, rgba(38, 38, 38, 0.9) 20%, rgb(38, 38, 38) 60%);
+    --color-bg: 27 23 20;
+    --color-bg-hover: 58 49 42;
+    --color-fg: 242 235 224;
+    --color-fg-muted: 181 169 154;
+    --color-primary: 36 31 26;
+    --color-secondary: 47 40 34;
+    --color-border: 75 65 56;
+    --color-bg-toggle: 36 31 26;
+    --color-bg-toggle-selected: 75 65 56;
+    --color-track-cursor: 212 175 106;
+    --color-track: 138 124 108;
+    --color-track-buffered: 92 80 69;
+    --color-brass: 212 175 106;
+    --gradient-item-page: linear-gradient(169deg, rgba(0, 0, 0, 0.4) 0%, rgba(27, 23, 20, 1) 80%);
+    --gradient-audio-player: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(27, 23, 20, 1) 80%);
+    --gradient-minimized-audio-player: linear-gradient(145deg, rgba(36, 31, 26, 0.55) 0%, rgba(36, 31, 26, 0.92) 20%, rgb(38, 38, 38) 60%);
   }
 
   html[data-theme='black'] {
@@ -36,6 +37,7 @@
       --color-track-cursor: 229 231 235;
       --color-track: 107 114 128;
       --color-track-buffered: 75 85 99;
+      --color-brass: 212 175 106;
       --gradient-item-page: rgb(0, 0, 0);
       --gradient-audio-player: rgb(0, 0, 0);
       --gradient-minimized-audio-player: rgb(0, 0, 0);
@@ -55,6 +57,7 @@
     --color-track-cursor: 101 109 118;
     --color-track: 189 191 191;
     --color-track-buffered: 129 131 131;
+    --color-brass: 132 98 32;
     --gradient-item-page: linear-gradient(169deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 1) 80%);
     --gradient-audio-player: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 80%);
     --gradient-minimized-audio-player: linear-gradient(145deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.9) 20%, rgb(255, 255, 255) 60%);

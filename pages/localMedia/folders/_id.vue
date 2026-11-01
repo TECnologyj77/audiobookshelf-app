@@ -152,11 +152,11 @@ export default {
 
 <style scoped>
 .media-item-container {
-  height: calc(100vh - 210px);
-  max-height: calc(100vh - 210px);
+  height: calc(100vh - 210px - var(--shell-bottom));
+  max-height: calc(100vh - 210px - var(--shell-bottom));
 }
 .playerOpen .media-item-container {
-  height: calc(100vh - 310px);
-  max-height: calc(100vh - 310px);
+  height: calc(100vh - 310px - var(--shell-bottom));
+  max-height: calc(100vh - 310px - var(--shell-bottom));
 }
 </style>

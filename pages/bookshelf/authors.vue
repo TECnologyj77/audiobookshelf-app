@@ -24,10 +24,10 @@ export default {
       return this.$store.state.libraries.currentLibraryId
     },
     cardWidth() {
-      const minCardWidth = 170
+      const minCardWidth = 160
       const cardPadding = 16
       // 32px of page padding, plus 1px because innerWidth is rounded and can exceed the real width
-      const availableWidth = this.$store.state.globals.windowWidth - 33
+      const availableWidth = this.$store.getters['globals/getContentWidth'] - 33
       const columns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardPadding)))
       return Math.floor(availableWidth / columns - cardPadding)
     },

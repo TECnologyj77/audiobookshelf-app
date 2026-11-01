@@ -719,7 +719,7 @@ export default {
       if (!e.changedTouches || this.$store.state.globals.isModalOpen) return
       const touchPosY = e.changedTouches[0].pageY
       // when minimized only listen to touchstart on the player
-      if (!this.showFullscreen && touchPosY < window.innerHeight - 120) return
+      if (!this.showFullscreen && !e.target.closest?.('#playerContent, .cover-wrapper, .title-author-texts')) return
 
       // for ios
       if (!this.showFullscreen && e.pageX < 20) {
@@ -989,7 +989,7 @@ export default {
       const coverHeight = this.fullscreenBookCoverWidth * this.bookCoverAspectRatio
       const coverImageWidthCollapsed = 46 / this.bookCoverAspectRatio
       const titleAuthorLeftOffsetCollapsed = 30 + coverImageWidthCollapsed
-      const titleAuthorWidthCollapsed = this.windowWidth - 128 - titleAuthorLeftOffsetCollapsed - 10
+      const titleAuthorWidthCollapsed = this.$store.getters['globals/getContentWidth'] - 128 - titleAuthorLeftOffsetCollapsed - 10
 
       document.documentElement.style.setProperty('--cover-image-width', this.fullscreenBookCoverWidth + 'px')
       document.documentElement.style.setProperty('--cover-image-height', coverHeight + 'px')
@@ -1073,6 +1073,12 @@ export default {
     width: 50%;
     left: 50%;
   }
+}
+#streamContainer:not(.fullscreen) {
+  left: var(--shell-left);
+  height: calc(100vh - env(safe-area-inset-top) - var(--shell-bottom));
+  min-height: 0;
+  max-height: calc(100vh - env(safe-area-inset-top) - var(--shell-bottom));
 }
 #playerContent {
   box-shadow: 0px -8px 8px #11111155;

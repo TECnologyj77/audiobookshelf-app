@@ -39,16 +39,43 @@ textarea {
   max-height: 100%;
 }
 
+/* Navigation is a bottom bar on narrow windows and a side rail from 600px */
+:root {
+  --shell-left: 0px;
+  --shell-bottom: 0px;
+  --mini-player-height: 120px;
+}
+.app-shell {
+  display: flex;
+  flex-direction: column;
+}
+.app-shell.has-nav {
+  --shell-bottom: 64px;
+}
+.app-main {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 600px) {
+  .app-shell {
+    flex-direction: row;
+  }
+  .app-shell.has-nav {
+    --shell-left: 80px;
+    --shell-bottom: 0px;
+  }
+}
+
 #content {
-  height: calc(100% - 64px);
-  min-height: calc(100% - 64px);
-  max-height: calc(100% - 64px);
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 #content.playerOpen {
-  height: calc(100% - 184px);
-  min-height: calc(100% - 184px);
-  max-height: calc(100% - 184px);
+  margin-bottom: var(--mini-player-height);
 }
 
 #bookshelf {

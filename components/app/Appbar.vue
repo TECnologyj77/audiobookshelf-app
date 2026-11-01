@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full h-16 bg-primary relative z-20">
+  <div class="w-full h-14 flex-shrink-0 bg-primary relative z-20">
     <div id="appbar" class="absolute top-0 left-0 w-full h-full flex items-center px-2">
-      <nuxt-link v-show="!showBack" to="/" class="mr-3">
+      <nuxt-link v-show="!showBack" to="/" class="mr-3 medium:hidden">
         <img src="/Logo.png" class="h-10 w-10" />
       </nuxt-link>
       <a v-if="showBack" @click="back" aria-label="Back" class="rounded-full h-10 w-10 flex items-center justify-center mr-2 cursor-pointer">
@@ -27,11 +27,11 @@
         </span>
       </button>
 
-      <nuxt-link v-if="user" class="mx-1.5 flex items-center h-10" to="/search" aria-label="Search">
+      <nuxt-link v-if="user" class="flex items-center justify-center h-10 w-10" to="/search" aria-label="Search">
         <span class="material-symbols text-2xl leading-none">search</span>
       </nuxt-link>
 
-      <button type="button" aria-label="Toggle side drawer" class="h-7 mx-1.5" @click="clickShowSideDrawer">
+      <button type="button" aria-label="Toggle side drawer" class="h-10 w-10 flex items-center justify-center medium:hidden" @click="clickShowSideDrawer">
         <span class="material-symbols" style="font-size: 1.75rem">menu</span>
       </button>
     </div>
@@ -113,9 +113,6 @@ export default {
 </script>
 
 <style>
-#appbar {
-  box-shadow: 0px 5px 5px #11111155;
-}
 .loader-dots div {
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }

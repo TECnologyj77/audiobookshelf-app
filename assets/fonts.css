@@ -25,6 +25,14 @@
     'FILL' 1
 }
 
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url(/fonts/Literata/literata-latin-wght-normal.woff2) format('woff2');
+}
+
 /* cyrillic-ext */
 @font-face {
   font-family: 'Source Sans Pro';

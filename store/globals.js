@@ -1,6 +1,10 @@
 // Window size classes, in CSS px. Keep in sync with the screens in tailwind.config.js
 export const MEDIUM_MIN_WIDTH = 600
 export const EXPANDED_MIN_WIDTH = 840
+export const NAV_RAIL_WIDTH = 80
+
+// Width left for page content once the navigation rail is taken out
+export const getContentWidth = (windowWidth) => (windowWidth >= MEDIUM_MIN_WIDTH ? windowWidth - NAV_RAIL_WIDTH : windowWidth)
 
 export const state = () => ({
   windowWidth: process.client ? window.innerWidth : 0,
@@ -31,6 +35,7 @@ export const getters = {
     if (state.windowWidth >= MEDIUM_MIN_WIDTH) return 'medium'
     return 'compact'
   },
+  getContentWidth: (state) => getContentWidth(state.windowWidth),
   getDownloadItem:
     (state) =>
     (libraryItemId, episodeId = null) => {

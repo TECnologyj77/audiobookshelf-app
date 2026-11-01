@@ -446,20 +446,20 @@ export default {
 
 <style scoped>
 .media-item-container {
-  height: calc(100vh - 200px);
-  max-height: calc(100vh - 200px);
+  height: calc(100vh - 200px - var(--shell-bottom));
+  max-height: calc(100vh - 200px - var(--shell-bottom));
 }
 .media-item-container.media-order-changed {
-  height: calc(100vh - 280px);
-  max-height: calc(100vh - 280px);
+  height: calc(100vh - 280px - var(--shell-bottom));
+  max-height: calc(100vh - 280px - var(--shell-bottom));
 }
 .playerOpen .media-item-container {
-  height: calc(100vh - 300px);
-  max-height: calc(100vh - 300px);
+  height: calc(100vh - 300px - var(--shell-bottom));
+  max-height: calc(100vh - 300px - var(--shell-bottom));
 }
 .playerOpen .media-item-container.media-order-changed {
-  height: calc(100vh - 380px);
-  max-height: calc(100vh - 380px);
+  height: calc(100vh - 380px - var(--shell-bottom));
+  max-height: calc(100vh - 380px - var(--shell-bottom));
 }
 .sortable-ghost {
   opacity: 0.5;

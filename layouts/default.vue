@@ -1,8 +1,11 @@
 <template>
-  <div class="w-full layout-wrapper bg-bg">
-    <app-appbar />
-    <div id="content" class="overflow-hidden relative" :class="isPlayerOpen ? 'playerOpen' : ''">
-      <Nuxt :key="currentLang" />
+  <div class="app-shell w-full layout-wrapper bg-bg" :class="{ 'has-nav': showNav }">
+    <app-main-nav v-if="showNav" />
+    <div class="app-main">
+      <app-appbar />
+      <div id="content" class="overflow-hidden relative" :class="isPlayerOpen ? 'playerOpen' : ''">
+        <Nuxt :key="currentLang" />
+      </div>
     </div>
     <app-audio-player-container ref="streamContainer" />
     <modals-libraries-modal />
@@ -86,6 +89,9 @@ export default {
     },
     routeName() {
       return this.$route.name
+    },
+    showNav() {
+      return this.$route.name !== 'connect'
     },
     networkConnected() {
       return this.$store.state.networkConnected

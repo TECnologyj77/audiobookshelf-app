@@ -17,6 +17,7 @@
 
 <script>
 import bookshelfCardsHelpers from '@/mixins/bookshelfCardsHelpers'
+import { getContentWidth } from '@/store/globals'
 
 export default {
   props: {
@@ -115,7 +116,7 @@ export default {
       return this.$store.getters['libraries/getBookCoverAspectRatio']
     },
     bookWidth() {
-      const availableWidth = this.layoutWidth - 16
+      const availableWidth = getContentWidth(this.layoutWidth) - 16
       let coverSize = 100
 
       // Smaller screens fill width with 2 items per row
@@ -126,6 +127,12 @@ export default {
           coverSize = Math.min(availableWidth - 24, 200)
         }
         if (this.isCoverSquareAspectRatio || this.entityName === 'playlists') coverSize /= 1.6
+      } else {
+        // Wider windows: fit whole columns and grow the covers to use up the width
+        const isSquare = this.isCoverSquareAspectRatio || this.entityName === 'playlists'
+        const cardMargin = 24
+        const columns = Math.max(1, Math.floor(availableWidth / ((isSquare ? 144 : 100) + cardMargin)))
+        return Math.floor(availableWidth / columns - cardMargin)
       }
 
       if (this.isCoverSquareAspectRatio || this.entityName === 'playlists') return coverSize * 1.6
