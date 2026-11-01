@@ -24,9 +24,12 @@ export default {
       return this.$store.state.libraries.currentLibraryId
     },
     cardWidth() {
-      const columnsBySizeClass = { compact: 2, medium: 3, expanded: 4 }
-      const columns = columnsBySizeClass[this.$store.getters['globals/getSizeClass']]
-      return (this.$store.state.globals.windowWidth - 32 - columns * 16) / columns
+      const minCardWidth = 170
+      const cardPadding = 16
+      // 32px of page padding, plus 1px because innerWidth is rounded and can exceed the real width
+      const availableWidth = this.$store.state.globals.windowWidth - 33
+      const columns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardPadding)))
+      return Math.floor(availableWidth / columns - cardPadding)
     },
     cardHeight() {
       return this.cardWidth * 1.25
