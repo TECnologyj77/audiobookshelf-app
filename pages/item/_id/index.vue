@@ -4,8 +4,8 @@
   </div>
   <div v-else id="item-page" class="w-full h-full overflow-y-auto overflow-x-hidden relative bg-bg">
     <!-- cover -->
-    <div class="w-full flex justify-center relative">
-      <div style="width: 0; transform: translateX(-50vw); overflow: visible">
+    <div class="item-cover-pane w-full flex justify-center relative" :style="{ '--item-cover-tint': coverRgb || 'rgb(var(--color-secondary))', '--item-pane-height': coverPaneHeight + 'px' }">
+      <div class="item-cover-blur" style="width: 0; transform: translateX(-50vw); overflow: visible">
         <div style="width: 150vw; overflow: hidden">
           <div id="coverBg" style="filter: blur(5vw)">
             <covers-book-cover :library-item="libraryItem" :width="coverWidth" :book-cover-aspect-ratio="bookCoverAspectRatio" @imageLoaded="coverImageLoaded" />
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="relative">
+    <div class="item-details-pane relative">
       <!-- background gradient -->
       <div id="item-page-bg-gradient" class="absolute top-0 left-0 w-full pointer-events-none z-0" :style="{ opacity: coverRgb ? 1 : 0 }">
         <div class="w-full h-full" :style="{ backgroundColor: coverRgb }" />
@@ -27,13 +27,13 @@
 
       <div class="relative z-10 px-3 py-4">
         <!-- title -->
-        <div class="text-center mb-2">
-          <div class="flex items-center justify-center">
-            <h1 class="text-xl font-semibold">{{ title }}</h1>
+        <div class="text-center medium:text-left mb-2">
+          <div class="flex items-center justify-center medium:justify-start">
+            <h1 class="font-book text-2xl font-semibold leading-tight">{{ title }}</h1>
             <widgets-explicit-indicator v-if="isExplicit" />
             <widgets-abridged-indicator v-if="isAbridged" />
           </div>
-          <p v-if="subtitle" class="text-fg text-base">{{ subtitle }}</p>
+          <p v-if="subtitle" class="text-fg-muted text-base mt-1">{{ subtitle }}</p>
         </div>
 
         <div v-if="hasLocal" class="mx-1">
@@ -51,7 +51,7 @@
         <!-- action buttons -->
         <div class="col-span-full">
           <div v-if="showPlay || showRead" class="flex mt-4 -mx-1">
-            <ui-btn v-if="showPlay" color="success" class="flex items-center justify-center flex-grow mx-1" :loading="playerIsStartingForThisMedia" :padding-x="4" @click="playClick">
+            <ui-btn v-if="showPlay" color="brass" class="font-semibold flex items-center justify-center flex-grow mx-1" :loading="playerIsStartingForThisMedia" :padding-x="4" @click="playClick">
               <span class="material-symbols text-2xl fill">{{ playerIsPlaying ? 'pause' : 'play_arrow' }}</span>
               <span class="px-1 text-sm">{{ playerIsPlaying ? $strings.ButtonPause : isPodcast ? $strings.ButtonNextEpisode : hasLocal ? $strings.ButtonPlay : $strings.ButtonStream }}</span>
             </ui-btn>
@@ -85,7 +85,7 @@
 
         <!-- metadata -->
         <div id="metadata" class="grid gap-2 my-2" style>
-          <div v-if="podcastAuthor || bookAuthors?.length" class="text-fg-muted uppercase text-sm">{{ $strings.LabelAuthor }}</div>
+          <div v-if="podcastAuthor || bookAuthors?.length" class="text-fg-muted text-sm">{{ $strings.LabelAuthor }}</div>
           <div v-if="podcastAuthor" class="text-sm">{{ podcastAuthor }}</div>
           <div v-else-if="bookAuthors?.length" class="text-sm">
             <template v-for="(author, index) in bookAuthors">
@@ -94,10 +94,10 @@
             </template>
           </div>
 
-          <div v-if="podcastType" class="text-fg-muted uppercase text-sm">{{ $strings.LabelType }}</div>
+          <div v-if="podcastType" class="text-fg-muted text-sm">{{ $strings.LabelType }}</div>
           <div v-if="podcastType" class="text-sm capitalize">{{ podcastType }}</div>
 
-          <div v-if="series?.length" class="text-fg-muted uppercase text-sm">{{ $strings.LabelSeries }}</div>
+          <div v-if="series?.length" class="text-fg-muted text-sm">{{ $strings.LabelSeries }}</div>
           <div v-if="series?.length" class="text-sm">
             <template v-for="(series, index) in seriesList">
               <nuxt-link :key="series.id" :to="`/bookshelf/series/${series.id}`" class="underline whitespace-nowrap">{{ series.text }}</nuxt-link
@@ -105,10 +105,10 @@
             </template>
           </div>
 
-          <div v-if="numTracks" class="text-fg-muted uppercase text-sm">{{ $strings.LabelDuration }}</div>
+          <div v-if="numTracks" class="text-fg-muted text-sm">{{ $strings.LabelDuration }}</div>
           <div v-if="numTracks" class="text-sm">{{ $elapsedPretty(duration) }}</div>
 
-          <div v-if="narrators?.length" class="text-fg-muted uppercase text-sm">{{ $strings.LabelNarrators }}</div>
+          <div v-if="narrators?.length" class="text-fg-muted text-sm">{{ $strings.LabelNarrators }}</div>
           <div v-if="narrators?.length" class="text-sm">
             <template v-for="(narrator, index) in narrators">
               <nuxt-link :key="narrator" :to="`/bookshelf/library?filter=narrators.${$encode(narrator)}`" class="underline whitespace-nowrap">{{ narrator }}</nuxt-link
@@ -116,7 +116,7 @@
             </template>
           </div>
 
-          <div v-if="genres.length" class="text-fg-muted uppercase text-sm">{{ $strings.LabelGenres }}</div>
+          <div v-if="genres.length" class="text-fg-muted text-sm">{{ $strings.LabelGenres }}</div>
           <div v-if="genres.length" class="text-sm">
             <template v-for="(genre, index) in genres">
               <nuxt-link :key="genre" :to="`/bookshelf/library?filter=genres.${$encode(genre)}`" class="underline whitespace-nowrap">{{ genre }}</nuxt-link
@@ -124,7 +124,7 @@
             </template>
           </div>
 
-          <div v-if="tags.length" class="text-fg-muted uppercase text-sm">{{ $strings.LabelTags }}</div>
+          <div v-if="tags.length" class="text-fg-muted text-sm">{{ $strings.LabelTags }}</div>
           <div v-if="tags.length" class="text-sm">
             <template v-for="(tag, index) in tags">
               <nuxt-link :key="tag" :to="`/bookshelf/library?filter=tags.${$encode(tag)}`" class="underline whitespace-nowrap">{{ tag }}</nuxt-link
@@ -132,7 +132,7 @@
             </template>
           </div>
 
-          <div v-if="publishedYear" class="text-fg-muted uppercase text-sm">{{ $strings.LabelPublishYear }}</div>
+          <div v-if="publishedYear" class="text-fg-muted text-sm">{{ $strings.LabelPublishYear }}</div>
           <div v-if="publishedYear" class="text-sm">{{ publishedYear }}</div>
         </div>
 
@@ -474,7 +474,19 @@ export default {
     isCasting() {
       return this.$store.state.isCasting
     },
+    coverPaneHeight() {
+      const appBarHeight = 56
+      const miniPlayerHeight = this.$store.getters['getIsPlayerOpen'] ? 72 : 0
+      return this.$store.state.globals.windowHeight - appBarHeight - miniPlayerHeight
+    },
     coverWidth() {
+      if (this.windowWidth >= 600) {
+        // Two panes: keep in sync with the column widths in the styles below
+        const paneWidth = Math.max(280, this.$store.getters['globals/getContentWidth'] * 0.42)
+        const padding = 48
+        return Math.min(paneWidth - padding, (this.coverPaneHeight - padding) / this.bookCoverAspectRatio)
+      }
+
       let width = this.windowWidth - 94
       if (width > 325) return 325
       else if (width < 0) return 175
@@ -820,12 +832,35 @@ export default {
   max-width: 150vw !important;
 }
 
-@media only screen and (max-width: 500px) {
+/* Two panes from 600px: the cover stays put while the details scroll beside it */
+@media (min-width: 600px) {
+  #item-page {
+    display: grid;
+    grid-template-columns: minmax(280px, 42%) minmax(0, 1fr);
+    align-items: start;
+  }
+  .item-cover-pane {
+    position: sticky;
+    top: 0;
+    height: var(--item-pane-height);
+    align-items: center;
+    background: linear-gradient(170deg, color-mix(in srgb, var(--item-cover-tint) 55%, rgb(var(--color-bg))) 0%, rgb(var(--color-bg)) 100%);
+  }
+  .item-cover-blur,
+  #item-page-bg-gradient {
+    display: none;
+  }
+  .item-details-pane > .relative {
+    padding: 24px;
+  }
+}
+
+@media only screen and (max-width: 1099px) {
   #metadata {
     grid-template-columns: auto 1fr;
   }
 }
-@media only screen and (min-width: 500px) {
+@media only screen and (min-width: 1100px) {
   #metadata {
     grid-template-columns: auto 1fr auto 1fr;
   }

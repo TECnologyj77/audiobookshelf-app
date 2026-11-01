@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full h-full px-4 py-8 overflow-y-auto">
+  <div class="page-measure w-full h-full px-4 py-8 overflow-y-auto">
     <!-- Display settings -->
-    <p class="uppercase text-xs font-semibold text-fg-muted mb-2">{{ $strings.HeaderUserInterfaceSettings }}</p>
+    <p class="font-book font-semibold text-base text-fg mb-2">{{ $strings.HeaderUserInterfaceSettings }}</p>
     <div class="flex items-center py-3">
       <div class="w-10 flex justify-center" @click="toggleEnableAltView">
         <ui-toggle-switch v-model="enableBookshelfView" @input="saveSettings" />
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Playback settings -->
-    <p class="uppercase text-xs font-semibold text-fg-muted mb-2 mt-10">{{ $strings.HeaderPlaybackSettings }}</p>
+    <p class="font-book font-semibold text-base text-fg mb-2 mt-10">{{ $strings.HeaderPlaybackSettings }}</p>
     <div class="py-3 flex items-center">
       <p class="pr-4 w-36">{{ $strings.LabelJumpBackwardsTime }}</p>
       <div @click.stop="showJumpBackwardsOptions">
@@ -70,7 +70,7 @@
 
     <!-- Sleep timer settings -->
     <template v-if="!isiOS">
-      <p class="uppercase text-xs font-semibold text-fg-muted mb-2 mt-10">{{ $strings.HeaderSleepTimerSettings }}</p>
+      <p class="font-book font-semibold text-base text-fg mb-2 mt-10">{{ $strings.HeaderSleepTimerSettings }}</p>
       <div class="flex items-center py-3">
         <div class="w-10 flex justify-center" @click="toggleDisableShakeToResetSleepTimer">
           <ui-toggle-switch v-model="settings.disableShakeToResetSleepTimer" @input="saveSettings" />
@@ -145,7 +145,7 @@
     </div>
 
     <!-- Data settings -->
-    <p class="uppercase text-xs font-semibold text-fg-muted mb-2 mt-10">{{ $strings.HeaderDataSettings }}</p>
+    <p class="font-book font-semibold text-base text-fg mb-2 mt-10">{{ $strings.HeaderDataSettings }}</p>
     <div class="py-3 flex items-center">
       <p class="pr-4 w-36">{{ $strings.LabelDownloadUsingCellular }}</p>
       <div @click.stop="showDownloadUsingCellularOptions">
@@ -161,7 +161,7 @@
 
     <!-- Android Auto settings -->
     <template v-if="!isiOS">
-      <p class="uppercase text-xs font-semibold text-fg-muted mb-2 mt-10">{{ $strings.HeaderAndroidAutoSettings }}</p>
+      <p class="font-book font-semibold text-base text-fg mb-2 mt-10">{{ $strings.HeaderAndroidAutoSettings }}</p>
       <div class="py-3 flex items-center">
         <p class="pr-4 w-36">{{ $strings.LabelAndroidAutoBrowseLimitForGrouping }}</p>
         <ui-text-input type="number" v-model="settings.androidAutoBrowseLimitForGrouping" style="width: 145px; max-width: 145px" @input="androidAutoBrowseLimitForGroupingUpdated" />

@@ -44,6 +44,8 @@ export default {
       if (this.loading) list.push('text-opacity-0')
       if (this.color === 'success') {
         list.push('text-white')
+      } else if (this.color === 'brass') {
+        list.push('text-primary')
       }
       list.push(`bg-${this.color}`)
       if (this.small) {
