@@ -12,7 +12,7 @@
         </div>
 
         <!-- No progress shown for collapsed series or podcasts in library -->
-        <div v-if="!isPodcast && !collapsedSeries" class="absolute bottom-0 left-0 h-1 shadow-sm max-w-full z-10 rounded-b" :class="itemIsFinished ? 'bg-success' : 'bg-yellow-400'" :style="{ width: coverWidth * userProgressPercent + 'px' }"></div>
+        <div v-if="!isPodcast && !collapsedSeries" class="absolute bottom-0 left-0 h-1 shadow-sm max-w-full z-10 rounded-b" :class="itemIsFinished ? 'bg-success' : 'bg-brass'" :style="{ width: coverWidth * userProgressPercent + 'px' }"></div>
       </div>
       <div class="flex-grow pl-2" :class="showPlayButton ? 'pr-12' : 'pr-2'">
         <p class="whitespace-normal line-clamp-2" :style="{ fontSize: 0.8 * sizeMultiplier + 'rem' }">

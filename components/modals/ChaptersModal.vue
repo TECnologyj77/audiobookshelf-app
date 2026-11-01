@@ -31,7 +31,7 @@
               </div>
             </div>
 
-            <div v-show="chapter.id === currentChapterId" class="w-0.5 h-full absolute top-0 left-0 bg-yellow-400" />
+            <div v-show="chapter.id === currentChapterId" class="w-0.5 h-full absolute top-0 left-0 bg-brass" />
           </li>
         </ul>
       </div>

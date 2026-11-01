@@ -2,19 +2,22 @@
   <div class="w-full h-12 bg-bg relative z-20">
     <div id="bookshelf-toolbar" class="absolute top-0 left-0 w-full h-full z-20 flex items-center pl-4 pr-1">
       <div class="flex items-center w-full text-sm">
-        <p v-show="!selectedSeriesName" class="text-fg-muted">{{ $formatNumber(totalEntities) }} {{ entityTitle }}</p>
+        <p v-show="!selectedSeriesName" class="text-fg-muted whitespace-nowrap" :class="{ 'hidden medium:block mr-3': showFilterChips }">{{ $formatNumber(totalEntities) }} {{ entityTitle }}</p>
+        <div v-if="showFilterChips" class="filter-chips flex items-center gap-2 min-w-0 overflow-x-auto" role="group" aria-label="Filter by progress">
+          <button v-for="chip in filterChips" :key="chip.value" type="button" class="filter-chip" :class="{ selected: selectedFilter === chip.value }" :aria-pressed="selectedFilter === chip.value" @click="selectFilterChip(chip.value)">{{ chip.text }}</button>
+        </div>
         <p v-show="selectedSeriesName" class="ml-2 pt-1">{{ selectedSeriesName }} ({{ $formatNumber(totalEntities) }})</p>
-        <div class="flex-grow" />
-        <span v-if="page == 'library' || seriesBookPage" class="material-symbols text-2xl px-2" @click="changeView">{{ !bookshelfListView ? 'view_list' : 'grid_view' }}</span>
+        <div class="flex-grow min-w-2" />
+        <span v-if="page == 'library' || seriesBookPage" class="toolbar-action material-symbols text-2xl" @click="changeView">{{ !bookshelfListView ? 'view_list' : 'grid_view' }}</span>
         <template v-if="page === 'library'">
-          <div class="relative flex items-center px-2">
-            <span class="material-symbols text-2xl" @click="showFilterModal = true">filter_alt</span>
-            <div v-show="hasFilters" class="absolute top-0 right-2 w-2 h-2 rounded-full bg-success border border-green-300 shadow-sm z-10 pointer-events-none" />
+          <div class="relative flex items-center flex-shrink-0">
+            <span class="toolbar-action material-symbols text-2xl" @click="showFilterModal = true">filter_alt</span>
+            <div v-show="hasOtherFilter" class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-brass z-10 pointer-events-none" />
           </div>
-          <span class="material-symbols text-2xl px-2" @click="showSortModal = true">sort</span>
+          <span class="toolbar-action material-symbols text-2xl" @click="showSortModal = true">sort</span>
         </template>
-        <span v-if="seriesBookPage" class="material-symbols text-2xl px-2" @click="downloadSeries">download</span>
-        <span v-if="(page == 'library' && isBookLibrary) || seriesBookPage" class="material-symbols text-2xl px-2" @click="showMoreMenuDialog = true">more_vert</span>
+        <span v-if="seriesBookPage" class="toolbar-action material-symbols text-2xl" @click="downloadSeries">download</span>
+        <span v-if="(page == 'library' && isBookLibrary) || seriesBookPage" class="toolbar-action material-symbols text-2xl" @click="showMoreMenuDialog = true">more_vert</span>
       </div>
     </div>
 
@@ -23,6 +26,39 @@
     <modals-dialog v-model="showMoreMenuDialog" :items="menuItems" @action="clickMenuAction" />
   </div>
 </template>
+
+<style>
+.toolbar-action {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-chips {
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+.filter-chip {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgb(var(--color-border));
+  color: rgb(var(--color-fg-muted));
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.filter-chip.selected {
+  background-color: rgb(var(--color-brass) / 0.22);
+  border-color: rgb(var(--color-brass) / 0.6);
+  color: rgb(var(--color-fg));
+  font-weight: 600;
+}
+</style>
 
 <script>
 export default {
@@ -51,8 +87,23 @@ export default {
     isBookLibrary() {
       return this.currentLibraryMediaType === 'book'
     },
-    hasFilters() {
-      return this.$store.getters['user/getUserSetting']('mobileFilterBy') !== 'all'
+    selectedFilter() {
+      return this.$store.getters['user/getUserSetting']('mobileFilterBy') || 'all'
+    },
+    showFilterChips() {
+      return this.page === 'library' && this.isBookLibrary
+    },
+    filterChips() {
+      const progress = (id) => `progress.${this.$encode(id)}`
+      return [
+        { text: this.$strings.LabelAll, value: 'all' },
+        { text: this.$strings.LabelInProgress, value: progress('in-progress') },
+        { text: this.$strings.LabelNotStarted, value: progress('not-started') },
+        { text: this.$strings.LabelFinished, value: progress('finished') }
+      ]
+    },
+    hasOtherFilter() {
+      return !this.filterChips.some((chip) => chip.value === this.selectedFilter)
     },
     page() {
       var routeName = this.$route.name || ''
@@ -124,6 +175,12 @@ export default {
       this.saveSettings()
     },
     updateFilter() {
+      this.saveSettings()
+    },
+    async selectFilterChip(value) {
+      if (value === this.selectedFilter) return
+      await this.$hapticsImpact()
+      this.settings.mobileFilterBy = value
       this.saveSettings()
     },
     saveSettings() {

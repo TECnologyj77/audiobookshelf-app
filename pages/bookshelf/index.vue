@@ -9,9 +9,10 @@
       <p class="pl-4">{{ $strings.MessageLoadingServerData }}</p>
     </div>
 
-    <div class="w-full" :class="{ 'py-6': altViewEnabled }">
-      <template v-for="(shelf, index) in shelves">
-        <bookshelf-shelf :key="shelf.id" :label="getShelfLabel(shelf)" :entities="shelf.entities" :type="shelf.type" :style="{ zIndex: shelves.length - index }" />
+    <div class="w-full" :class="{ 'py-4': altViewEnabled }">
+      <home-continue-hero v-if="heroShelf" :key="heroShelf.entities[0].id" :item="heroShelf.entities[0]" :label="getShelfLabel(heroShelf)" />
+      <template v-for="(shelf, index) in displayShelves">
+        <bookshelf-shelf :key="shelf.id" :label="shelf.hideLabel ? '' : getShelfLabel(shelf)" :entities="shelf.entities" :type="shelf.type" :style="{ zIndex: displayShelves.length - index }" />
       </template>
     </div>
 
@@ -106,6 +107,17 @@ export default {
     },
     altViewEnabled() {
       return this.$store.getters['getAltViewEnabled']
+    },
+    heroShelf() {
+      if (!this.altViewEnabled) return null
+      return this.shelves.find((shelf) => (shelf.id === 'continue-listening' || shelf.id === 'local-books-continue') && shelf.type === 'book' && shelf.entities.length) || null
+    },
+    displayShelves() {
+      // The first book moves into the large card. Anything else in progress stays in a row below it
+      return this.shelves.flatMap((shelf) => {
+        if (shelf !== this.heroShelf) return [shelf]
+        return shelf.entities.length > 1 ? [{ ...shelf, id: `${shelf.id}-more`, hideLabel: true, entities: shelf.entities.slice(1) }] : []
+      })
     },
     localMediaProgress() {
       return this.$store.state.globals.localMediaProgress
