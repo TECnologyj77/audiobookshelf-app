@@ -48,10 +48,21 @@ android {
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
   }
+  signingConfigs {
+    // Test key for sideloaded builds, kept in the repo so updates install over each other.
+    // Never use it for anything distributed to other people.
+    debug {
+      storeFile file('fold-test.keystore')
+      storePassword 'fold-test-key'
+      keyAlias 'fold-test'
+      keyPassword 'fold-test-key'
+    }
+  }
   buildTypes {
     debug {
-      applicationIdSuffix ".debug"
-      versionNameSuffix "-debug"
+      signingConfig signingConfigs.debug
+      applicationIdSuffix ".fold"
+      versionNameSuffix "-fold"
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }

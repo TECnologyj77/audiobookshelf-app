@@ -1297,6 +1297,11 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* This block fills the upper half to center its text, so only the text can take taps */
+  pointer-events: none;
+}
+.posture-tabletop .fullscreen .title-author-texts > * {
+  pointer-events: auto;
 }
 /* Read from a distance when the device is standing on a table */
 .posture-tabletop .fullscreen .title-author-texts .title-text {

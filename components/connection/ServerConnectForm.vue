@@ -223,7 +223,7 @@ export default {
       let redirect_uri_param = redirectUrl.searchParams.get('redirect_uri')
       // Backwards compatability with 2.6.0
       if (this.serverConfig.version === '2.6.0') {
-        redirect_uri_param = 'audiobookshelf://oauth'
+        redirect_uri_param = `${process.env.APP_URL_SCHEME}://oauth`
       }
 
       if (!client_id || !scope || !state || !redirect_uri_param) {
@@ -289,7 +289,7 @@ export default {
       this.oauth.verifier = verifier
       this.oauth.challenge = challenge
 
-      let backendEndpoint = `${url}/auth/openid?code_challenge=${challenge}&code_challenge_method=S256&redirect_uri=${encodeURIComponent('audiobookshelf://oauth')}&client_id=${encodeURIComponent('Audiobookshelf-App')}&response_type=code`
+      let backendEndpoint = `${url}/auth/openid?code_challenge=${challenge}&code_challenge_method=S256&redirect_uri=${encodeURIComponent(`${process.env.APP_URL_SCHEME}://oauth`)}&client_id=${encodeURIComponent('Audiobookshelf-App')}&response_type=code`
       // Backwards compatability with 2.6.0
       if (this.serverConfig.version === '2.6.0') {
         backendEndpoint += '&isRest=true'
@@ -338,7 +338,7 @@ export default {
 
       // audiobookshelf://oauth?code...
       // urlObj.hostname for iOS and urlObj.pathname for android
-      if (url.startsWith('audiobookshelf://oauth')) {
+      if (url.startsWith(`${process.env.APP_URL_SCHEME}://oauth`)) {
         // Extract possible errors thrown by the SSO provider
         const authError = urlObj.searchParams.get('error')
         if (authError) {
