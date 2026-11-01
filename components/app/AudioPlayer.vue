@@ -28,16 +28,20 @@
     <!-- Overall book progress bar -->
     <div v-if="playerSettings.useChapterTrack && playerSettings.useTotalTrack && showFullscreen" class="absolute total-track w-full z-30 px-6">
       <div class="flex">
-        <p class="font-mono text-fg" style="font-size: 0.8rem">{{ currentTimePretty }}</p>
+        <p class="text-fg tabular-nums text-sm">{{ currentTimePretty }}</p>
         <div class="flex-grow" />
-        <p class="font-mono text-fg" style="font-size: 0.8rem">{{ totalTimeRemainingPretty }}</p>
+        <p class="text-fg-muted tabular-nums text-sm">{{ totalTimeRemainingPretty }}</p>
       </div>
-      <div class="w-full">
+      <div class="w-full relative">
         <div class="h-1 w-full bg-track/50 relative rounded-full overflow-hidden">
           <div ref="totalReadyTrack" class="h-full bg-track-buffered absolute top-0 left-0 pointer-events-none rounded-full" />
           <div ref="totalBufferedTrack" class="h-full bg-track absolute top-0 left-0 pointer-events-none rounded-full" />
           <div ref="totalPlayedTrack" class="h-full bg-track-cursor absolute top-0 left-0 pointer-events-none rounded-full" />
         </div>
+        <template v-if="showFullscreen">
+            <span v-for="tick in totalTrackChapterTicks" :key="`tick-${tick}`" class="absolute top-0 h-full w-0.5 bg-black/60 pointer-events-none" :style="{ left: tick + '%' }" />
+            <span v-for="mark in totalTrackBookmarks" :key="`mark-${mark}`" class="player-bookmark-mark" :style="{ left: mark + '%' }" />
+          </template>
       </div>
     </div>
 
@@ -65,19 +69,19 @@
       <!-- Top controls bar - fullscreen only: bookmarks, speed, sleep timer, chapters -->
       <div v-if="showFullscreen" class="absolute bottom-4 left-0 right-0 w-full pb-4 pt-2 mx-auto px-6" style="max-width: 414px">
         <div class="flex items-center justify-between pointer-events-auto">
-          <span v-if="!isPodcast && serverLibraryItemId && socketConnected" class="material-symbols text-3xl text-fg-muted cursor-pointer" :class="{ fill: bookmarks.length }" @click="$emit('showBookmarks')">bookmark</span>
+          <span v-if="!isPodcast && serverLibraryItemId && socketConnected" class="player-action material-symbols text-3xl text-fg-muted cursor-pointer" :class="{ fill: bookmarks.length }" aria-label="Bookmarks" @click="$emit('showBookmarks')">bookmark</span>
           <!-- hidden for podcasts but still using this as a placeholder -->
-          <span v-else class="material-symbols text-3xl text-white text-opacity-0">bookmark</span>
+          <span v-else class="player-action material-symbols text-3xl text-white text-opacity-0">bookmark</span>
 
-          <span class="font-mono text-fg-muted cursor-pointer" style="font-size: 1.35rem" @click="$emit('selectPlaybackSpeed')">{{ currentPlaybackRate }}x</span>
-          <svg v-if="!sleepTimerRunning" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-fg-muted cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" @click.stop="$emit('showSleepTimer')">
+          <button type="button" class="h-9 px-3 rounded-full border border-fg/25 text-fg font-semibold tabular-nums" aria-label="Playback speed" @click="$emit('selectPlaybackSpeed')">{{ currentPlaybackRate }}x</button>
+          <svg v-if="!sleepTimerRunning" xmlns="http://www.w3.org/2000/svg" class="player-action p-2.5 text-fg-muted cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-label="Sleep timer" @click.stop="$emit('showSleepTimer')">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
-          <div v-else class="h-7 w-7 flex items-center justify-around cursor-pointer" @click.stop="$emit('showSleepTimer')">
-            <p class="text-xl font-mono text-success">{{ sleepTimeRemainingPretty }}</p>
+          <div v-else class="player-action flex items-center justify-around cursor-pointer" @click.stop="$emit('showSleepTimer')">
+            <p class="font-semibold tabular-nums text-brass">{{ sleepTimeRemainingPretty }}</p>
           </div>
 
-          <span class="material-symbols text-3xl text-fg cursor-pointer" :class="chapters.length ? 'text-opacity-75' : 'text-opacity-10'" @click="clickChaptersBtn">format_list_bulleted</span>
+          <span class="player-action material-symbols text-3xl cursor-pointer" :class="showChaptersPane ? 'text-brass' : chapters.length ? 'text-fg text-opacity-75' : 'text-fg text-opacity-10'" aria-label="Chapters" @click="clickChaptersBtn">format_list_bulleted</span>
         </div>
       </div>
       <div v-else class="w-full h-full absolute top-0 left-0 pointer-events-none" style="background: var(--gradient-minimized-audio-player)" />
@@ -107,10 +111,11 @@
       <!-- Chapter progress bar -->
       <div id="playerTrack" class="absolute left-0 w-full px-6">
         <div class="flex pointer-events-none">
-          <p class="font-mono text-fg" style="font-size: 0.8rem" ref="currentTimestamp">0:00</p>
+          <p class="text-fg tabular-nums text-sm" ref="currentTimestamp">0:00</p>
           <div class="flex-grow" />
-          <p class="font-mono text-fg" style="font-size: 0.8rem">{{ timeRemainingPretty }}</p>
+          <p class="text-fg-muted tabular-nums text-sm">{{ timeRemainingPretty }}</p>
         </div>
+        <div class="relative">
         <div ref="track" class="h-1.5 w-full bg-track/50 relative rounded-full overflow-hidden" :class="{ 'animate-pulse': showLoadingState }" @click.stop>
           <div ref="readyTrack" class="h-full bg-track-buffered absolute top-0 left-0 rounded-full pointer-events-none" />
           <div ref="bufferedTrack" class="h-full bg-track absolute top-0 left-0 rounded-full pointer-events-none" />
@@ -119,8 +124,16 @@
             <div class="bg-track-cursor rounded-full w-3.5 h-3.5 pointer-events-none" />
           </div>
         </div>
+        <template v-if="showFullscreen">
+            <span v-for="tick in mainTrackChapterTicks" :key="`tick-${tick}`" class="absolute top-0 h-full w-0.5 bg-black/60 pointer-events-none" :style="{ left: tick + '%' }" />
+            <span v-for="mark in mainTrackBookmarks" :key="`mark-${mark}`" class="player-bookmark-mark" :style="{ left: mark + '%' }" />
+          </template>
+        </div>
       </div>
     </div>
+
+    <!-- Chapters beside the controls on wide windows -->
+    <app-player-chapters-pane v-if="showChaptersPane && showFullscreen" :chapters="chapters" :current-chapter="currentChapter" :playback-rate="currentPlaybackRate" @select="selectChapter" @close="showChaptersPane = false" />
 
     <!-- Chapters modal - lists chapters for navigation -->
     <modals-chapters-modal v-model="showChapterModal" :current-chapter="currentChapter" :chapters="chapters" :playback-rate="currentPlaybackRate" @select="selectChapter" />
@@ -183,16 +196,20 @@ export default {
       draggingCurrentTime: 0,
       syncStatus: 0,
       showMoreMenuDialog: false,
-      coverRgb: 'rgb(55, 56, 56)',
+      coverRgb: 'rgb(47, 40, 34)',
       coverBgIsLight: false,
       titleMarquee: null,
       isRefreshingUI: false,
-      autoExpandedForTabletop: false
+      autoExpandedForTabletop: false,
+      showChaptersPane: false
     }
   },
   watch: {
     showFullscreen(val) {
-      if (!val) this.autoExpandedForTabletop = false
+      if (!val) {
+        this.autoExpandedForTabletop = false
+        this.showChaptersPane = false
+      }
       this.updateScreenSize()
       this.$store.commit('setPlayerFullscreen', !!val)
       document.querySelector('body').style.backgroundColor = this.showFullscreen ? this.coverRgb : ''
@@ -201,6 +218,7 @@ export default {
       this.updateScreenSize()
     },
     devicePosture(posture, previousPosture) {
+      if (posture === 'tabletop') this.showChaptersPane = false
       if (posture === 'tabletop') {
         // Standing the device on its hinge is a request for the now playing view
         const isBusy = this.$store.state.globals.isModalOpen || this.$store.state.showReader
@@ -282,9 +300,31 @@ export default {
     devicePosture() {
       return this.$store.state.globals.foldState.posture
     },
+    allChapterTicks() {
+      if (this.chapters.length < 2 || !this.totalDuration) return []
+      return this.chapters.slice(1).map((chapter) => (chapter.start / this.totalDuration) * 100)
+    },
+    allBookmarkMarks() {
+      if (!this.totalDuration) return []
+      return this.bookmarks.map((bookmark) => (bookmark.time / this.totalDuration) * 100)
+    },
+    totalTrackChapterTicks() {
+      return this.allChapterTicks
+    },
+    totalTrackBookmarks() {
+      return this.allBookmarkMarks
+    },
+    mainTrackChapterTicks() {
+      return this.playerSettings.useChapterTrack ? [] : this.allChapterTicks
+    },
+    mainTrackBookmarks() {
+      if (!this.playerSettings.useChapterTrack || !this.currentChapter) return this.allBookmarkMarks
+      const { start, end } = this.currentChapter
+      return this.bookmarks.filter((bookmark) => bookmark.time >= start && bookmark.time < end).map((bookmark) => ((bookmark.time - start) / (end - start)) * 100)
+    },
     bookCoverWidth() {
       if (this.showFullscreen) return this.fullscreenBookCoverWidth
-      return 46 / this.bookCoverAspectRatio
+      return 48 / this.bookCoverAspectRatio
     },
     fullscreenBookCoverWidth() {
       // Keep in sync with the two column media queries below
@@ -446,13 +486,17 @@ export default {
     },
     clickChaptersBtn() {
       if (!this.chapters.length) return
+      if (this.windowWidth >= 600 && this.devicePosture !== 'tabletop') {
+        this.showChaptersPane = !this.showChaptersPane
+        return
+      }
       this.showChapterModal = true
     },
     async coverImageLoaded(fullCoverUrl) {
       if (!fullCoverUrl) return
       const avg = await getAverageColorFromCoverUrl(this, fullCoverUrl)
       if (!avg) {
-        this.coverRgb = 'rgb(55, 56, 56)'
+        this.coverRgb = 'rgb(47, 40, 34)'
         this.coverBgIsLight = false
       } else {
         this.coverRgb = avg.rgba
@@ -987,14 +1031,14 @@ export default {
       this.windowHeight = window.innerHeight
       this.windowWidth = window.innerWidth
       const coverHeight = this.fullscreenBookCoverWidth * this.bookCoverAspectRatio
-      const coverImageWidthCollapsed = 46 / this.bookCoverAspectRatio
-      const titleAuthorLeftOffsetCollapsed = 30 + coverImageWidthCollapsed
-      const titleAuthorWidthCollapsed = this.$store.getters['globals/getContentWidth'] - 128 - titleAuthorLeftOffsetCollapsed - 10
+      const coverImageWidthCollapsed = 48 / this.bookCoverAspectRatio
+      const titleAuthorLeftOffsetCollapsed = 24 + coverImageWidthCollapsed
+      const titleAuthorWidthCollapsed = this.$store.getters['globals/getContentWidth'] - 140 - titleAuthorLeftOffsetCollapsed - 8
 
       document.documentElement.style.setProperty('--cover-image-width', this.fullscreenBookCoverWidth + 'px')
       document.documentElement.style.setProperty('--cover-image-height', coverHeight + 'px')
       document.documentElement.style.setProperty('--cover-image-width-collapsed', coverImageWidthCollapsed + 'px')
-      document.documentElement.style.setProperty('--cover-image-height-collapsed', 46 + 'px')
+      document.documentElement.style.setProperty('--cover-image-height-collapsed', 48 + 'px')
       document.documentElement.style.setProperty('--title-author-left-offset-collapsed', titleAuthorLeftOffsetCollapsed + 'px')
       document.documentElement.style.setProperty('--title-author-width-collapsed', titleAuthorWidthCollapsed + 'px')
     },
@@ -1056,14 +1100,14 @@ export default {
 :root {
   --cover-image-width: 0px;
   --cover-image-height: 0px;
-  --cover-image-width-collapsed: 46px;
-  --cover-image-height-collapsed: 46px;
+  --cover-image-width-collapsed: 48px;
+  --cover-image-height-collapsed: 48px;
   --title-author-left-offset-collapsed: 80px;
   --title-author-width-collapsed: 40%;
 }
 
 .playerContainer {
-  height: 120px;
+  height: var(--mini-player-height);
 }
 .fullscreen .playerContainer {
   height: 200px;
@@ -1087,6 +1131,60 @@ export default {
   box-shadow: none;
 }
 
+/* Mini player: slim progress line along the top edge */
+#streamContainer:not(.fullscreen) #playerContent {
+  padding: 0;
+  box-shadow: none;
+  border-top: 1px solid rgb(var(--color-border) / 0.5);
+}
+#streamContainer:not(.fullscreen) #playerTrack {
+  top: 0;
+  bottom: unset;
+  padding: 0;
+}
+#streamContainer:not(.fullscreen) #playerTrack > .flex {
+  display: none;
+}
+#streamContainer:not(.fullscreen) #playerTrack [class*='h-1.5'] {
+  height: 3px;
+  border-radius: 0;
+}
+.fullscreen .title-text {
+  font-family: 'Literata', Georgia, serif;
+  font-weight: 500;
+}
+.player-action {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.player-bookmark-mark {
+  position: absolute;
+  top: -7px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background-color: rgb(var(--color-brass));
+  pointer-events: none;
+}
+.player-chapters-pane {
+  left: 25px;
+  top: 50px;
+  width: calc(50% - 25px);
+  height: calc(100% - 85px);
+}
+@media (orientation: portrait) and (min-width: 600px) {
+  .player-chapters-pane {
+    width: calc(50% - 41px);
+  }
+}
+.posture-book .player-chapters-pane {
+  width: calc(var(--fold-left) - 41px);
+}
+
 #playerTrack {
   transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
   transition-property: margin;
@@ -1098,8 +1196,8 @@ export default {
 }
 
 .cover-wrapper {
-  bottom: 68px;
-  left: 24px;
+  bottom: 12px;
+  left: 12px;
   height: var(--cover-image-height-collapsed);
   width: var(--cover-image-width-collapsed);
   transition: all 0.25s cubic-bezier(0.39, 0.575, 0.565, 1);
@@ -1155,7 +1253,7 @@ export default {
   transform-origin: left bottom;
 
   width: var(--title-author-width-collapsed);
-  bottom: 76px;
+  bottom: 16px;
   left: var(--title-author-left-offset-collapsed);
   text-align: left;
 }
@@ -1200,9 +1298,9 @@ export default {
 #playerControls {
   transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
   transition-property: width, bottom;
-  width: 128px;
-  padding-right: 24px;
-  bottom: 70px;
+  width: 140px;
+  padding-right: 12px;
+  bottom: 16px;
 }
 #playerControls .jump-icon {
   transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);

@@ -43,7 +43,7 @@ textarea {
 :root {
   --shell-left: 0px;
   --shell-bottom: 0px;
-  --mini-player-height: 120px;
+  --mini-player-height: 72px;
 }
 .app-shell {
   display: flex;
