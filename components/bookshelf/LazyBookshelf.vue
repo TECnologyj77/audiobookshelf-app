@@ -138,17 +138,25 @@ export default {
       if (this.isCoverSquareAspectRatio || this.entityName === 'playlists') return coverSize * 1.6
       return coverSize
     },
+    seriesCardWidth() {
+      const availableWidth = getContentWidth(this.layoutWidth) - 16
+      const cardMargin = 24
+      const columns = Math.max(1, Math.floor(availableWidth / (210 + cardMargin)))
+      return Math.floor(availableWidth / columns - cardMargin)
+    },
     bookHeight() {
       if (this.isCoverSquareAspectRatio || this.entityName === 'playlists') return this.bookWidth
       return this.bookWidth * 1.6
     },
     entityWidth() {
       if (this.showBookshelfListView) return this.bookshelfWidth - 16
+      if (this.entityName === 'series') return this.seriesCardWidth
       if (this.isBookEntity || this.entityName === 'playlists') return this.bookWidth
       return this.bookWidth * 2
     },
     entityHeight() {
       if (this.showBookshelfListView) return 88
+      if (this.entityName === 'series') return Math.round(this.seriesCardWidth * 0.58)
       return this.bookHeight
     },
     currentLibraryId() {
@@ -160,6 +168,7 @@ export default {
     shelfHeight() {
       if (this.showBookshelfListView) return this.entityHeight + 16
       if (this.altViewEnabled) {
+        if (this.entityName === 'series') return this.entityHeight + 76
         var extraTitleSpace = this.isBookEntity ? 80 : 40
         return this.entityHeight + extraTitleSpace * this.sizeMultiplier
       }
@@ -391,8 +400,9 @@ export default {
     scroll(e) {
       if (!e || !e.target) return
       if (!this.user) return
-      var { scrollTop } = e.target
-      this.handleScroll(scrollTop)
+      // Anything above the grid, such as the series header, is not part of the rows
+      const offsetTop = document.getElementById('bookshelf')?.offsetTop || 0
+      this.handleScroll(Math.max(0, e.target.scrollTop - offsetTop))
     },
     buildSearchParams() {
       if (this.page === 'search' || this.page === 'collections') {

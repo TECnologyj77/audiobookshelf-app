@@ -6,7 +6,7 @@
         <div v-if="showFilterChips" class="filter-chips flex items-center gap-2 min-w-0 overflow-x-auto" role="group" aria-label="Filter by progress">
           <button v-for="chip in filterChips" :key="chip.value" type="button" class="filter-chip" :class="{ selected: selectedFilter === chip.value }" :aria-pressed="selectedFilter === chip.value" @click="selectFilterChip(chip.value)">{{ chip.text }}</button>
         </div>
-        <p v-show="selectedSeriesName" class="ml-2 pt-1">{{ selectedSeriesName }} ({{ $formatNumber(totalEntities) }})</p>
+        <p v-show="selectedSeriesName" class="text-fg-muted whitespace-nowrap">{{ $formatNumber(totalEntities) }} {{ $strings.LabelBooks }}</p>
         <div class="flex-grow min-w-2" />
         <span v-if="page == 'library' || seriesBookPage" class="toolbar-action material-symbols text-2xl" @click="changeView">{{ !bookshelfListView ? 'view_list' : 'grid_view' }}</span>
         <template v-if="page === 'library'">

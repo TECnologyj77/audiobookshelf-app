@@ -1,6 +1,6 @@
 <template>
-  <section class="continue-hero" :style="{ '--hero-tint': coverRgb || 'rgb(var(--color-secondary))' }" :aria-label="label">
-    <h2 class="font-book font-semibold text-lg px-4 pb-3">{{ label }}</h2>
+  <section class="continue-hero" :class="{ 'continue-hero-wood bookshelfRow shelf-shade': isWood }" :style="{ '--hero-tint': coverRgb || 'rgb(var(--color-secondary))' }" :aria-label="label">
+    <h2 v-if="!isWood" class="font-book font-semibold text-lg px-4 pb-3">{{ label }}</h2>
     <div class="continue-hero-card" @click="openItem">
       <covers-book-cover class="flex-shrink-0 rounded-lg" :library-item="item" :width="coverWidth" :book-cover-aspect-ratio="bookCoverAspectRatio" @imageLoaded="coverLoaded" />
 
@@ -19,6 +19,12 @@
             <span class="font-semibold text-sm pr-1">{{ isPlaying ? $strings.ButtonPause : $strings.ButtonPlay }}</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <div v-if="isWood" class="relative h-5 mt-4 bookshelfDivider">
+      <div class="absolute bottom-0 left-4 right-4 flex">
+        <div class="shelf-plaque"><span>{{ label }}</span></div>
       </div>
     </div>
   </section>
@@ -41,6 +47,9 @@ export default {
     }
   },
   computed: {
+    isWood() {
+      return !this.$store.getters['getAltViewEnabled']
+    },
     bookCoverAspectRatio() {
       return this.$store.getters['libraries/getBookCoverAspectRatio']
     },
@@ -120,6 +129,13 @@ export default {
   background: rgb(var(--color-secondary));
   background: linear-gradient(105deg, color-mix(in srgb, var(--hero-tint) 62%, rgb(var(--color-primary))) 0%, rgb(var(--color-secondary)) 78%);
   transition: background 0.3s;
+}
+.continue-hero-wood {
+  padding: 20px 0 0;
+}
+.continue-hero-wood .continue-hero-card {
+  background: linear-gradient(105deg, color-mix(in srgb, var(--hero-tint) 62%, #241f1a) 0%, #241f1aee 78%);
+  box-shadow: 0 6px 16px #00000080;
 }
 .continue-hero-play {
   display: inline-flex;

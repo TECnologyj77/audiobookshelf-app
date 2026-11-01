@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full min-h-full relative">
+  <div class="w-full h-full min-h-full relative" :class="{ 'bookshelfRow overflow-y-auto': !altViewEnabled }">
     <div v-if="attemptingConnection" class="w-full pt-4 flex items-center justify-center">
       <widgets-loading-spinner />
       <p class="pl-4">{{ $strings.MessageAttemptingServerConnection }}</p>
@@ -109,7 +109,6 @@ export default {
       return this.$store.getters['getAltViewEnabled']
     },
     heroShelf() {
-      if (!this.altViewEnabled) return null
       return this.shelves.find((shelf) => (shelf.id === 'continue-listening' || shelf.id === 'local-books-continue') && shelf.type === 'book' && shelf.entities.length) || null
     },
     displayShelves() {

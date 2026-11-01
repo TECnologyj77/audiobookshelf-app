@@ -4,19 +4,17 @@
       <h2 class="font-book font-semibold text-lg">{{ label }}</h2>
     </div>
 
-    <div class="flex items-end px-3 max-w-full overflow-x-auto" :class="altViewEnabled ? (label ? '' : 'pt-3') : 'bookshelfRow'" :style="{ height: shelfHeight + 'px', paddingBottom: entityPaddingBottom + 'px' }">
+    <div class="flex items-end px-3 max-w-full overflow-x-auto" :class="altViewEnabled ? (label ? '' : 'pt-3') : 'bookshelfRow shelf-shade'" :style="{ height: shelfHeight + 'px', paddingBottom: entityPaddingBottom + 'px' }">
       <template v-for="(entity, index) in entities">
         <cards-lazy-book-card v-if="type === 'book' || type === 'podcast'" :key="entity.id" :index="index" :book-mount="entity" :width="bookWidth" :height="entityHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" :is-alt-view-enabled="altViewEnabled" class="mx-2 relative" />
         <cards-lazy-book-card v-if="type === 'episode'" :key="entity.recentEpisode.id" :index="index" :book-mount="entity" :width="bookWidth" :height="entityHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" :is-alt-view-enabled="altViewEnabled" class="mx-2 relative" />
-        <cards-lazy-series-card v-else-if="type === 'series'" :key="entity.id" :index="index" :series-mount="entity" :width="bookWidth * 2" :height="entityHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" :is-alt-view-enabled="altViewEnabled" is-categorized class="mx-2 relative" />
+        <cards-lazy-series-card v-else-if="type === 'series'" :key="entity.id" :index="index" :series-mount="entity" :width="bookWidth * 1.6" :height="entityHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" :is-alt-view-enabled="altViewEnabled" is-categorized class="mx-2 relative" />
         <cards-author-card v-else-if="type === 'authors'" :key="entity.id" :width="bookWidth / 1.25" :height="bookWidth" :author="entity" :size-multiplier="1" class="mx-2" />
       </template>
     </div>
 
-    <div v-if="!altViewEnabled" class="absolute text-center categoryPlacardtransform z-30 bottom-0.5 left-4 md:left-8 w-36 rounded-md" style="height: 18px">
-      <div class="w-full h-full flex items-center justify-center rounded-sm border shinyBlack">
-        <p class="transform text-xs">{{ label }}</p>
-      </div>
+    <div v-if="!altViewEnabled && label" class="absolute z-50 left-4 right-4 flex" style="bottom: 0">
+      <div class="shelf-plaque"><span>{{ label }}</span></div>
     </div>
     <div v-if="!altViewEnabled" class="w-full h-5 z-40 bookshelfDivider"></div>
   </div>

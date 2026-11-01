@@ -1,5 +1,8 @@
 <template>
-  <bookshelf-lazy-bookshelf page="series-books" :series-id="seriesId" v-on:downloadSeriesClick="downloadSeriesClick" />
+  <div class="h-full">
+    <home-series-header :series="series" />
+    <bookshelf-lazy-bookshelf page="series-books" :series-id="seriesId" v-on:downloadSeriesClick="downloadSeriesClick" />
+  </div>
 </template>
 
 <script>
@@ -9,7 +12,7 @@ import cellularPermissionHelpers from '@/mixins/cellularPermissionHelpers'
 
 export default {
   async asyncData({ params, app, store, redirect }) {
-    var series = await app.$nativeHttp.get(`/api/series/${params.id}`).catch((error) => {
+    var series = await app.$nativeHttp.get(`/api/series/${params.id}?include=progress`).catch((error) => {
       console.error('Failed', error)
       return false
     })

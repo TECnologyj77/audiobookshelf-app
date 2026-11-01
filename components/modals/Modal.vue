@@ -74,7 +74,19 @@ export default {
       if (this.processing && this.persistent) return
       if (ev && ev.srcElement && ev.srcElement.classList && ev.srcElement.classList.contains('modal-bg')) {
         this.show = false
+        if (ev.type === 'touchstart') this.ignoreClickAfterTouch()
       }
+    },
+    ignoreClickAfterTouch() {
+      // The dialog is gone by the time this touch becomes a click, which would otherwise hit what was behind it
+      const ignoreClick = (event) => {
+        event.stopPropagation()
+        event.preventDefault()
+        stopIgnoring()
+      }
+      const stopIgnoring = () => document.removeEventListener('click', ignoreClick, true)
+      document.addEventListener('click', ignoreClick, true)
+      setTimeout(stopIgnoring, 500)
     },
     setShow() {
       this.$store.commit('globals/setIsModalOpen', true)

@@ -2,6 +2,7 @@
   <!-- Main container - only shows when playback session exists, applies fullscreen/platform classes -->
   <div v-if="playbackSession" id="streamContainer" class="fixed top-0 left-0 layout-wrapper right-0 z-50 pointer-events-none" :class="{ fullscreen: showFullscreen, 'ios-player': $platform === 'ios', 'web-player': $platform === 'web' }">
     <!-- Fullscreen overlays: colored background and menu overlays -->
+    <transition name="player-overlay">
     <div v-if="showFullscreen" class="w-full h-full z-10 absolute top-0 left-0 pointer-events-auto" :style="{ backgroundColor: coverRgb }">
       <!-- Background gradient for player -->
       <div class="w-full h-full absolute top-0 left-0 pointer-events-none" style="background: var(--gradient-audio-player)" />
@@ -24,6 +25,7 @@
       <!-- Playback method indicator (Direct/Local/Transcode) -->
       <p class="top-4 absolute left-0 right-0 mx-auto text-center uppercase tracking-widest text-opacity-75 z-50" :class="{ 'text-black text-opacity-75': coverBgIsLight && theme !== 'black' }" style="font-size: 10px">{{ isDirectPlayMethod ? $strings.LabelPlaybackDirect : isLocalPlayMethod ? $strings.LabelPlaybackLocal : $strings.LabelPlaybackTranscode }}</p>
     </div>
+    </transition>
 
     <!-- Overall book progress bar -->
     <div v-if="playerSettings.useChapterTrack && playerSettings.useTotalTrack && showFullscreen" class="absolute total-track w-full z-30 px-6">
@@ -65,7 +67,7 @@
       <p class="author-text text-fg text-opacity-75 truncate">{{ authorName }}</p>
     </div>
 
-    <div id="playerContent" class="playerContainer w-full z-20 absolute bottom-0 left-0 right-0 p-2 pointer-events-auto transition-all" :style="{ backgroundColor: showFullscreen ? '' : coverRgb }" @click="clickContainer">
+    <div id="playerContent" class="playerContainer w-full z-20 absolute bottom-0 left-0 right-0 p-2 pointer-events-auto" :style="{ backgroundColor: showFullscreen ? '' : coverRgb }" @click="clickContainer">
       <!-- Top controls bar - fullscreen only: bookmarks, speed, sleep timer, chapters -->
       <div v-if="showFullscreen" class="absolute bottom-4 left-0 right-0 w-full pb-4 pt-2 mx-auto px-6" style="max-width: 414px">
         <div class="flex items-center justify-between pointer-events-auto">
@@ -206,6 +208,7 @@ export default {
   },
   watch: {
     showFullscreen(val) {
+      this.animateCoverTravel()
       if (!val) {
         this.autoExpandedForTabletop = false
         this.showChaptersPane = false
@@ -1008,6 +1011,57 @@ export default {
 
       this.isRefreshingUI = false
     },
+    getCoverRect() {
+      // The cover can be fitted inside a larger wrapper, so work out where the picture itself sits
+      const wrapper = this.$el?.querySelector?.('.cover-wrapper')
+      if (!wrapper) return null
+      const box = wrapper.getBoundingClientRect()
+      if (!box.width || !box.height) return null
+      const ratio = this.bookCoverAspectRatio || 1
+      const width = Math.min(box.width, box.height / ratio)
+      const height = width * ratio
+      return { left: box.left + (box.width - width) / 2, top: box.top + (box.height - height) / 2, width, height }
+    },
+    async animateCoverTravel() {
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+      this.finishCoverTravel?.()
+
+      const wrapper = this.$el?.querySelector?.('.cover-wrapper')
+      const src = wrapper?.querySelector('img')?.src
+      const from = this.getCoverRect()
+      if (!src || !from) return
+
+      await this.$nextTick()
+      const to = this.getCoverRect()
+      if (!to) return
+
+      // Fly a copy of the cover at its larger size so it stays sharp, while the real one waits underneath
+      const large = from.width > to.width ? from : to
+      const ghost = document.createElement('img')
+      ghost.src = src
+      ghost.className = 'player-cover-ghost'
+      ghost.style.left = large.left + 'px'
+      ghost.style.top = large.top + 'px'
+      ghost.style.width = large.width + 'px'
+      ghost.style.height = large.height + 'px'
+      document.body.appendChild(ghost)
+      wrapper.style.visibility = 'hidden'
+
+      const place = (rect) => `translate(${rect.left - large.left}px, ${rect.top - large.top}px) scale(${rect.width / large.width})`
+      const travel = ghost.animate([{ transform: place(from) }, { transform: place(to) }], { duration: 280, easing: 'cubic-bezier(0.2, 0, 0, 1)' })
+
+      this.finishCoverTravel = () => {
+        ghost.remove()
+        wrapper.style.visibility = ''
+        this.finishCoverTravel = null
+      }
+      travel.onfinish = () => this.finishCoverTravel?.()
+
+      // Everything else fades in at its new position
+      this.$el.querySelectorAll('.title-author-texts, #playerContent, .total-track').forEach((el) => {
+        el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 60, easing: 'ease-out', fill: 'backwards' })
+      })
+    },
     measureAndUpdateTrackWidth() {
       if (!this.$refs.track) {
         console.error('Track not loaded', this.$refs)
@@ -1069,6 +1123,7 @@ export default {
     this.$nextTick(this.init)
   },
   beforeDestroy() {
+    this.finishCoverTravel?.()
     if (screen.orientation) {
       // Not available on ios
       screen.orientation.removeEventListener('change', this.screenOrientationChange)
@@ -1153,6 +1208,22 @@ export default {
   font-family: 'Literata', Georgia, serif;
   font-weight: 500;
 }
+.player-overlay-enter-active,
+.player-overlay-leave-active {
+  transition: opacity 0.2s ease;
+}
+.player-overlay-enter,
+.player-overlay-leave-to {
+  opacity: 0;
+}
+.player-cover-ghost {
+  position: fixed;
+  z-index: 60;
+  transform-origin: top left;
+  pointer-events: none;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px #00000066;
+}
 .player-action {
   width: 48px;
   height: 48px;
@@ -1186,8 +1257,6 @@ export default {
 }
 
 #playerTrack {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: margin;
   bottom: 35px;
   max-width: 100%;
 }
@@ -1200,8 +1269,6 @@ export default {
   left: 12px;
   height: var(--cover-image-height-collapsed);
   width: var(--cover-image-width-collapsed);
-  transition: all 0.25s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: left, bottom, width, height;
   transform-origin: left bottom;
   border-radius: 3px;
   overflow: hidden;
@@ -1248,8 +1315,6 @@ export default {
   }
 }
 .title-author-texts {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: left, bottom, width, height;
   transform-origin: left bottom;
 
   width: var(--title-author-width-collapsed);
@@ -1258,8 +1323,6 @@ export default {
   text-align: left;
 }
 .title-author-texts .title-text {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: font-size;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -1269,8 +1332,6 @@ export default {
   }
 }
 .title-author-texts .author-text {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: font-size;
   font-size: 0.75rem;
   line-height: 1.2;
 }
@@ -1296,16 +1357,11 @@ export default {
 }
 
 #playerControls {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: width, bottom;
   width: 140px;
   padding-right: 12px;
   bottom: 16px;
 }
 #playerControls .jump-icon {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: font-size;
-
   margin: 0px 0px;
   font-size: 1.6rem;
 }
@@ -1313,9 +1369,6 @@ export default {
   margin-top: 2px;
 }
 #playerControls .play-btn {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: padding, margin, height, width, min-width, min-height;
-
   height: 40px;
   width: 40px;
   min-width: 40px;
@@ -1323,9 +1376,6 @@ export default {
   margin: 0px 7px;
 }
 #playerControls .play-btn .material-symbols {
-  transition: all 0.15s cubic-bezier(0.39, 0.575, 0.565, 1);
-  transition-property: font-size;
-
   font-size: 1.5rem;
 }
 
