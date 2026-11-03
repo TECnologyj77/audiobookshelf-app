@@ -69,11 +69,9 @@
 
     <div id="playerContent" class="playerContainer w-full z-20 absolute bottom-0 left-0 right-0 p-2 pointer-events-auto" :style="{ backgroundColor: showFullscreen ? '' : coverRgb }" @click="clickContainer">
       <!-- Top controls bar - fullscreen only: bookmarks, speed, sleep timer, chapters -->
-      <div v-if="showFullscreen" class="absolute bottom-4 left-0 right-0 w-full pb-4 pt-2 mx-auto px-6" style="max-width: 414px">
-        <div class="flex items-center justify-between pointer-events-auto">
+      <div v-if="showFullscreen" class="absolute bottom-4 left-0 right-0 w-full mx-auto px-6" style="max-width: 414px">
+        <div class="flex items-center justify-evenly pointer-events-auto">
           <span v-if="!isPodcast && serverLibraryItemId && socketConnected" class="player-action material-symbols text-3xl text-fg-muted cursor-pointer" :class="{ fill: bookmarks.length }" aria-label="Bookmarks" @click="$emit('showBookmarks')">bookmark</span>
-          <!-- hidden for podcasts but still using this as a placeholder -->
-          <span v-else class="player-action material-symbols text-3xl text-white text-opacity-0">bookmark</span>
 
           <button type="button" class="h-9 px-3 rounded-full border border-fg/25 text-fg font-semibold tabular-nums" aria-label="Playback speed" @click="$emit('selectPlaybackSpeed')">{{ currentPlaybackRate }}x</button>
           <svg v-if="!sleepTimerRunning" xmlns="http://www.w3.org/2000/svg" class="player-action p-2.5 text-fg-muted cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-label="Sleep timer" @click.stop="$emit('showSleepTimer')">
@@ -336,7 +334,7 @@ export default {
         let sideSpace = 20
         if (this.bookCoverAspectRatio === 1.6) sideSpace += (this.windowWidth - sideSpace) * 0.375
 
-        const availableHeight = this.windowHeight - 400
+        const availableHeight = this.windowHeight - 412
         let width = this.windowWidth - sideSpace
         const totalHeight = width * this.bookCoverAspectRatio
         if (totalHeight > availableHeight) {
@@ -1165,7 +1163,7 @@ export default {
   height: var(--mini-player-height);
 }
 .fullscreen .playerContainer {
-  height: 200px;
+  height: 212px;
 }
 @media (orientation: landscape), (min-width: 600px) {
   .fullscreen .playerContainer {
@@ -1295,7 +1293,7 @@ export default {
 }
 
 .total-track {
-  bottom: 215px;
+  bottom: 227px;
   left: 0;
   right: 0;
 }
@@ -1342,7 +1340,7 @@ export default {
 }
 
 .fullscreen .title-author-texts {
-  bottom: calc(50% - var(--cover-image-height) / 2 + 50px);
+  bottom: max(calc(50% - var(--cover-image-height) / 2 + 62px), 264px);
   width: 80%;
   left: 10%;
   text-align: center;
@@ -1384,7 +1382,7 @@ export default {
   height: var(--cover-image-height);
   width: var(--cover-image-width);
   left: calc(50% - (calc(var(--cover-image-width)) / 2));
-  bottom: calc(50% + 120px - (calc(var(--cover-image-height)) / 2));
+  bottom: calc(50% + 132px - (calc(var(--cover-image-height)) / 2));
   border-radius: 16px;
   overflow: hidden;
 }
@@ -1393,7 +1391,7 @@ export default {
   width: 100%;
   padding-left: 24px;
   padding-right: 24px;
-  bottom: 78px;
+  bottom: 82px;
   left: 0;
 }
 .fullscreen #playerControls .jump-icon {
